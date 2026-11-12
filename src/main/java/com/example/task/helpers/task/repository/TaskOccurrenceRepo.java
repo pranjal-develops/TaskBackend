@@ -15,10 +15,12 @@ import org.springframework.data.repository.query.Param;
 
 public interface TaskOccurrenceRepo extends JpaRepository<TaskOccurrence, Long> {
     @Query("SELECT o FROM TaskOccurrence o " +
-            "LEFT JOIN o.task t " +
-            "LEFT JOIN t.collabs c " +
-            "WHERE (t.creator = :user OR (c.collaborator = :user AND c.status in ('ACCEPTED', 'APPROVED'))) " +
-            "AND o.startTimeUtc >= :start AND o.startTimeUtc <= :end")
+            "JOIN o.task t " +
+            "WHERE (t.creator = :user OR EXISTS (" +
+            "SELECT c.id FROM CollaborationRequest c " +
+            "WHERE c.task = t AND c.collaborator = :user AND c.status in ('ACCEPTED', 'APPROVED'))) " +
+            "AND o.startTimeUtc < :end AND o.endTimeUtc > :start")
+//            "AND o.startTimeUtc >= :start AND o.endTimeUtc <= :end")
     Page<TaskOccurrence> findByCollaboratorOrCreatorInRange(
             @Param("user") User user,
             @Param("start") Instant start,
@@ -26,9 +28,10 @@ public interface TaskOccurrenceRepo extends JpaRepository<TaskOccurrence, Long> 
             Pageable pageable);
 
     @Query("SELECT o FROM TaskOccurrence o " +
-            "LEFT JOIN o.task t " +
-            "LEFT JOIN t.collabs c " +
-            "WHERE (t.creator = :user OR (c.collaborator = :user AND c.status in ('ACCEPTED', 'APPROVED'))) " +
+            "JOIN o.task t " +
+            "WHERE (t.creator = :user OR EXISTS (" +
+            "SELECT c.id FROM CollaborationRequest c " +
+            "WHERE c.task = t AND c.collaborator = :user AND c.status in ('ACCEPTED', 'APPROVED'))) " +
             "AND o.startTimeUtc < :end AND o.endTimeUtc > :start")
     List<TaskOccurrence> findByCollaboratorOrCreatorInRangeNoPage(
             @Param("user") User user,
