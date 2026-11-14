@@ -36,6 +36,7 @@ public class SecurityConfig {
                         request
                                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                                 .requestMatchers("/api/user/register", "/api/user/login", "/api/user/refresh", "/api/user/*").permitAll()
+                                .requestMatchers( "/v3/api-docs/**" , "/swagger-ui/**" , "/swagger-ui.html").permitAll() // Added for OpenAPI
                                 .requestMatchers("/error").permitAll()
                                 .anyRequest().authenticated()
                         )
